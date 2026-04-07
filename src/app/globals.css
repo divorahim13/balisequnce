@@ -1,0 +1,73 @@
+@import "tailwindcss";
+
+:root {
+  --background: #0A0505;
+  --foreground: #F3EBE6;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-serif: var(--font-playfair);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+@media (pointer: fine) {
+  body, a, button, input {
+    cursor: none !important;
+  }
+}
+
+@keyframes scroll-line {
+  0% {
+    transform: translateY(-101%);
+  }
+  50% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(101%);
+  }
+}
+
+.animate-scroll-line {
+  animation: scroll-line 2s cubic-bezier(0.76, 0, 0.24, 1) infinite;
+}
+
+/* Custom utility missing in Tailwind v4 by default */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+@keyframes sonar-pulse {
+  0% {
+    transform: scale(0.5);
+    opacity: 0.8;
+    box-shadow: 0 0 0 0 rgba(212, 163, 115, 0.7);
+  }
+  70% {
+    transform: scale(1);
+    opacity: 0;
+    box-shadow: 0 0 0 20px rgba(212, 163, 115, 0);
+  }
+  100% {
+    transform: scale(0.5);
+    opacity: 0;
+    box-shadow: 0 0 0 0 rgba(212, 163, 115, 0);
+  }
+}
+
+.animate-sonar {
+  animation: sonar-pulse 2s infinite cubic-bezier(0.25, 1, 0.5, 1);
+}
