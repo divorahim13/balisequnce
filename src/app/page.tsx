@@ -179,35 +179,39 @@ export default function Home() {
   }, []);
 
   useGSAP(() => {
-    // Horizontal Scroll Trigger for Section 3
+    // Horizontal Scroll Trigger for Section 3 (desktop only)
     if (section3Ref.current && carouselTrackRef.current) {
       const track = carouselTrackRef.current;
+      const mm = gsap.matchMedia();
 
-      // We use a small timeout to ensure the DOM layout is fully calculated 
-      // after tab switches before establishing the physical scroll boundaries.
       const setupTrigger = () => {
         ScrollTrigger.refresh();
         const scrollDistance = track.scrollWidth - window.innerWidth + window.innerWidth * 0.3; // 30vw right padding buffer
 
         if (scrollDistance > 0) {
-          gsap.to(track, {
-            x: -scrollDistance,
-            ease: "none",
-            scrollTrigger: {
-              trigger: section3Ref.current,
-              pin: true,
-              scrub: 1, // Smooth scrub
-              start: "top top",
-              end: () => `+=${scrollDistance}`, // Scroll down by the exact horizontal width
-              invalidateOnRefresh: true,
-              refreshPriority: 0,
-            }
+          mm.add("(min-width: 768px)", () => {
+            gsap.to(track, {
+              x: -scrollDistance,
+              ease: "none",
+              scrollTrigger: {
+                trigger: section3Ref.current,
+                pin: true,
+                scrub: 1, // Smooth scrub
+                start: "top top",
+                end: () => `+=${scrollDistance}`, // Scroll down by the exact horizontal width
+                invalidateOnRefresh: true,
+                refreshPriority: 0,
+              }
+            });
           });
         }
       };
 
       const timer = setTimeout(setupTrigger, 50);
-      return () => clearTimeout(timer);
+      return () => {
+        clearTimeout(timer);
+        mm.revert();
+      };
     }
   }, { scope: section3Ref, dependencies: [] });
 
@@ -215,14 +219,17 @@ export default function Home() {
     // Both Section 1 and Section 2 text mapping have been moved directly to the <ImageSequence onProgress> hook 
     // to strictly bind it to the video frame rate, permanently bypassing dynamic ScrollTrigger geometry bugs.
 
-    // Section 4: Split Screen Pin
+    // Section 4: Split Screen Pin (desktop only)
     if (section4Ref.current && s4LeftRef.current && s4RightRef.current) {
-      ScrollTrigger.create({
-        trigger: section4Ref.current,
-        start: "top top",
-        end: () => `+=${s4RightRef.current?.offsetHeight! - window.innerHeight}`,
-        pin: s4LeftRef.current,
-        refreshPriority: 0,
+      const mm4 = gsap.matchMedia();
+      mm4.add("(min-width: 1024px)", () => {
+        ScrollTrigger.create({
+          trigger: section4Ref.current,
+          start: "top top",
+          end: () => `+=${s4RightRef.current?.offsetHeight! - window.innerHeight}`,
+          pin: s4LeftRef.current,
+          refreshPriority: 0,
+        });
       });
     }
 
@@ -334,11 +341,13 @@ export default function Home() {
       </div>
 
       {/* Mobile Menu Overlay */}
-      <div className={`fixed inset-0 z-[55] bg-[#0A0505]/95 backdrop-blur-2xl transition-all duration-500 flex flex-col items-center justify-center gap-8 ${isMobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
+      <div className={`fixed inset-0 z-[55] bg-[#0A0505]/95 backdrop-blur-2xl transition-all duration-500 flex flex-col items-center justify-center gap-6 md:gap-8 ${isMobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
         <button onClick={(e) => scrollTo("#hero-sequence", e)} className="text-2xl font-light tracking-[0.2em] text-white uppercase hover:text-[#D4A373] transition-colors">Home</button>
         <button onClick={(e) => scrollTo("#section4", e)} className="text-2xl font-light tracking-[0.2em] text-white uppercase hover:text-[#D4A373] transition-colors">Destinations</button>
         <button onClick={(e) => scrollTo("#section5", e)} className="text-2xl font-light tracking-[0.2em] text-white uppercase hover:text-[#D4A373] transition-colors">Experiences</button>
-        <button onClick={(e) => scrollTo("#section7", e)} className="mt-8 rounded-full bg-white px-10 py-4 text-sm font-bold text-black transition-all hover:scale-105 active:scale-95 shadow-lg">
+        <button onClick={(e) => scrollTo("#pricing", e)} className="text-2xl font-light tracking-[0.2em] text-white uppercase hover:text-[#D4A373] transition-colors">Pricing</button>
+        <button onClick={(e) => scrollTo("#faq", e)} className="text-2xl font-light tracking-[0.2em] text-white uppercase hover:text-[#D4A373] transition-colors">FAQ</button>
+        <button onClick={(e) => scrollTo("#section7", e)} className="mt-6 rounded-full bg-white px-10 py-4 text-sm font-bold text-black transition-all hover:scale-105 active:scale-95 shadow-lg">
           Book Now
         </button>
       </div>
@@ -426,43 +435,43 @@ export default function Home() {
 
         <div ref={heroContentRef} className="relative z-10 flex h-full w-full items-center justify-center pointer-events-auto opacity-0 translate-y-10">
           {/* Hero Content */}
-          <div className="relative z-10 flex flex-col items-center px-6 text-center">
-            <span className="mb-4 text-[11px] font-light tracking-[0.4em] text-white/90 uppercase drop-shadow-md">
+          <div className="relative z-10 flex flex-col items-center px-4 sm:px-6 text-center">
+            <span className="mb-3 sm:mb-4 text-[10px] sm:text-[11px] font-light tracking-[0.4em] text-white/90 uppercase drop-shadow-md">
               Discover the magic
             </span>
-            <h1 className="max-w-4xl text-5xl font-light leading-tight tracking-wide text-white md:text-7xl lg:text-8xl drop-shadow-lg">
+            <h1 className="max-w-4xl text-3xl sm:text-6xl md:text-7xl lg:text-8xl font-light leading-tight tracking-wide text-white drop-shadow-lg">
               Where Every Wave <br />
               Tells a Story
             </h1>
-            <p className="mt-8 max-w-2xl text-lg font-light text-white/80 md:text-xl drop-shadow-md tracking-wide">
+            <p className="mt-6 sm:mt-8 max-w-xl sm:max-w-2xl text-sm sm:text-lg md:text-xl font-light text-white/80 drop-shadow-md tracking-wide">
               Experience the ultimate blend of luxury and nature in the heart of Bali.
               Your journey to paradise starts here.
             </p>
-            <div className="mt-12 flex flex-col gap-4 sm:flex-row">
-              <button className="rounded-full bg-white px-8 py-4 text-[11px] font-medium tracking-[0.2em] text-black uppercase transition-transform hover:scale-105 active:scale-95">
+            <div className="mt-8 sm:mt-12 flex flex-col gap-3 sm:flex-row">
+              <button className="rounded-full bg-white px-6 py-3 sm:px-8 sm:py-4 text-[10px] sm:text-[11px] font-medium tracking-[0.2em] text-black uppercase transition-transform hover:scale-105 active:scale-95">
                 Explore Destinations
               </button>
-              <button className="rounded-full bg-white/10 px-8 py-4 text-[11px] font-medium tracking-[0.2em] text-white uppercase backdrop-blur-sm transition-all hover:bg-white/20">
+              <button className="rounded-full bg-white/10 px-6 py-3 sm:px-8 sm:py-4 text-[10px] sm:text-[11px] font-medium tracking-[0.2em] text-white uppercase backdrop-blur-sm transition-all hover:bg-white/20">
                 Watch Experience
               </button>
             </div>
           </div>
         </div>
 
-        {/* Contact Us - Always Visible (Bottom Left) */}
-        <div className="absolute bottom-12 left-12 z-50 flex items-center bg-white/5 backdrop-blur-xl border border-white/10 rounded-full px-8 py-3.5 shadow-2xl pointer-events-auto transition-all hover:bg-white/10 hover:border-white/30 cursor-pointer">
+        {/* Contact Us - Hidden on Mobile to prevent overlap */}
+        <div className="absolute bottom-12 left-12 z-50 hidden md:flex items-center bg-white/5 backdrop-blur-xl border border-white/10 rounded-full px-8 py-3.5 shadow-2xl pointer-events-auto transition-all hover:bg-white/10 hover:border-white/30 cursor-pointer">
           <span className="text-[11px] font-light tracking-[0.25em] text-white/90 uppercase">
             Contact Us
           </span>
         </div>
 
         {/* Second Content: Glassmorphism Card (Middle Left) */}
-        <div ref={cardRef} className="absolute bottom-36 left-12 z-20 max-w-sm rounded-3xl bg-white/5 p-8 backdrop-blur-2xl border border-white/10 shadow-2xl opacity-0 -translate-x-10 pointer-events-auto">
-          <h3 className="mb-3 text-2xl font-light tracking-[0.1em] text-white">Join Us</h3>
-          <p className="text-sm font-light tracking-wide leading-relaxed text-white/70">
+        <div ref={cardRef} className="absolute bottom-24 left-6 right-6 md:left-12 md:right-auto md:bottom-36 z-20 max-w-sm rounded-3xl bg-white/5 p-6 md:p-8 backdrop-blur-2xl border border-white/10 shadow-2xl opacity-0 -translate-x-10 pointer-events-auto">
+          <h3 className="mb-2 md:mb-3 text-xl md:text-2xl font-light tracking-[0.1em] text-white">Join Us</h3>
+          <p className="text-xs md:text-sm font-light tracking-wide leading-relaxed text-white/70">
             Embark on a journey that transcends the ordinary. Immerse yourself in the vibrant culture, pristine beaches, and lush landscapes of Bali. Experience personalized itineraries crafted just for you, ensuring every moment becomes a cherished memory.
           </p>
-          <button className="mt-6 font-light text-white uppercase tracking-[0.2em] text-[10px] py-2.5 px-6 rounded-full border border-white/20 hover:bg-white hover:text-black transition-all">
+          <button className="mt-4 md:mt-6 font-light text-white uppercase tracking-[0.2em] text-[9px] md:text-[10px] py-2 px-5 md:py-2.5 md:px-6 rounded-full border border-white/20 hover:bg-white hover:text-black transition-all">
             Start Planning
           </button>
         </div>
@@ -516,29 +525,29 @@ export default function Home() {
           }}
         >
           <div ref={section2DestinationsRef} className="absolute inset-0 z-20 flex flex-col items-center justify-center pointer-events-none opacity-0 translate-y-10">
-            <h3 className="mb-12 text-[12px] font-semibold tracking-[0.5em] text-white uppercase drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)]">
+            <h3 className="mb-6 md:mb-12 text-[10px] md:text-[12px] font-semibold tracking-[0.5em] text-white uppercase drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)]">
               Preview the Extraordinary
             </h3>
-            <div className="flex flex-col md:flex-row gap-12 md:gap-8 items-center text-center bg-black/50 backdrop-blur-xl border border-white/20 p-8 rounded-3xl shadow-[0_0_40px_rgba(0,0,0,0.5)]">
+            <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-center text-center bg-black/50 backdrop-blur-xl border border-white/20 p-6 md:p-8 rounded-3xl shadow-[0_0_40px_rgba(0,0,0,0.5)]">
               <div className="flex flex-col items-center">
-                <h4 className="text-2xl font-medium text-white tracking-[0.15em] uppercase drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)]">Ubud</h4>
-                <p className="text-white/90 text-xs mt-3 font-medium max-w-[200px] leading-relaxed drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">
+                <h4 className="text-xl md:text-2xl font-medium text-white tracking-[0.15em] uppercase drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)]">Ubud</h4>
+                <p className="text-white/90 text-[11px] md:text-xs mt-2 md:mt-3 font-medium max-w-[200px] leading-relaxed drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">
                   Cultural heartbeats, sacred temples, and lush terraced landscapes.
                 </p>
               </div>
               <div className="w-px h-20 bg-white/30 hidden md:block" />
-              <div className="w-20 h-px bg-white/30 md:hidden" />
+              <div className="w-12 h-px bg-white/30 md:hidden my-1" />
               <div className="flex flex-col items-center">
-                <h4 className="text-2xl font-medium text-white tracking-[0.15em] uppercase drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)]">Uluwatu</h4>
-                <p className="text-white/90 text-xs mt-3 font-medium max-w-[200px] leading-relaxed drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">
+                <h4 className="text-xl md:text-2xl font-medium text-white tracking-[0.15em] uppercase drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)]">Uluwatu</h4>
+                <p className="text-white/90 text-[11px] md:text-xs mt-2 md:mt-3 font-medium max-w-[200px] leading-relaxed drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">
                   Majestic limestone cliffs and legendary ocean sunsets.
                 </p>
               </div>
               <div className="w-px h-20 bg-white/30 hidden md:block" />
-              <div className="w-20 h-px bg-white/30 md:hidden" />
+              <div className="w-12 h-px bg-white/30 md:hidden my-1" />
               <div className="flex flex-col items-center">
-                <h4 className="text-2xl font-medium text-white tracking-[0.15em] uppercase drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)]">Nusa Penida</h4>
-                <p className="text-white/90 text-xs mt-3 font-medium max-w-[200px] leading-relaxed drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">
+                <h4 className="text-xl md:text-2xl font-medium text-white tracking-[0.15em] uppercase drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)]">Nusa Penida</h4>
+                <p className="text-white/90 text-[11px] md:text-xs mt-2 md:mt-3 font-medium max-w-[200px] leading-relaxed drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">
                   Untouched beaches, exotic marine life, and crystal clear waters.
                 </p>
               </div>
@@ -573,7 +582,7 @@ export default function Home() {
         </div>
 
         {/* Carousel Container */}
-        <div className="relative w-full pl-8 lg:pl-[calc((100vw-64rem)/2+2rem)] xl:pl-[calc((100vw-80rem)/2+2rem)] overflow-visible">
+        <div className="relative w-full pl-8 lg:pl-[calc((100vw-64rem)/2+2rem)] xl:pl-[calc((100vw-80rem)/2+2rem)] overflow-x-auto md:overflow-visible scrollbar-hide">
           <div
             ref={carouselTrackRef}
             className="flex gap-6 w-max pb-8 md:pb-12 select-none pr-8"
@@ -599,12 +608,12 @@ export default function Home() {
       <section ref={section4Ref} id="section4" className="relative z-30 w-full bg-[#0A0505] text-[#F3EBE6]">
         <div className="flex flex-col lg:flex-row w-full mx-auto max-w-7xl">
           {/* Left Pinned Content */}
-          <div ref={s4LeftRef} className="w-full lg:w-5/12 h-screen flex flex-col justify-center px-8 z-10">
+          <div ref={s4LeftRef} className="w-full lg:w-5/12 h-auto py-16 lg:py-0 lg:h-screen flex flex-col justify-center px-8 z-10">
             <div className="mb-4 flex items-center gap-2 text-[10px] font-bold tracking-[0.2em] uppercase">
               <span className="h-2 w-2 rounded-full bg-[#D4A373]"></span>
               The Sanctuary
             </div>
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-serif leading-tight mb-8">
+            <h2 className="text-3xl md:text-5xl lg:text-6xl font-serif leading-tight mb-6 md:mb-8">
               Sanctuaries<br />crafted by<br />nature.
             </h2>
             <p className="text-sm leading-relaxed text-[#F3EBE6]/70 max-w-md">
@@ -613,7 +622,7 @@ export default function Home() {
           </div>
 
           {/* Right Scrolling Visuals */}
-          <div ref={s4RightRef} className="w-full lg:w-7/12 flex flex-col py-[20vh] gap-[20vh] px-8">
+          <div ref={s4RightRef} className="w-full lg:w-7/12 flex flex-col py-[10vh] lg:py-[20vh] gap-[10vh] lg:gap-[20vh] px-8">
             {section4Data.map((villa, idx) => (
               <div key={idx} className="flex flex-col gap-6">
                 <div className="relative aspect-[4/5] w-full overflow-hidden rounded-2xl">
@@ -651,11 +660,11 @@ export default function Home() {
           </div>
 
           {/* Strong Anti-Package Tour Messaging */}
-          <h2 className="text-4xl md:text-5xl lg:text-5xl font-serif text-[#F3EBE6] mb-4">
+          <h2 className="text-3xl md:text-5xl lg:text-5xl font-serif text-[#F3EBE6] mb-4">
             No set itineraries. <br />
-            <span className="text-[#F3EBE6]/50 italic font-light">100% Tailor-made for you.</span>
+            <span className="text-[#F3EBE6]/50 italic font-light text-2xl md:text-4xl">100% Tailor-made for you.</span>
           </h2>
-          <p className="text-[#F3EBE6]/70 max-w-2xl text-sm md:text-base leading-relaxed mb-16">
+          <p className="text-[#F3EBE6]/70 max-w-2xl text-xs md:text-sm lg:text-base leading-relaxed mb-10 md:mb-16">
             We reject the concept of rigid package tours. The journeys below are simply conceptual blue-prints to spark your imagination. Your actual adventure is a blank canvas, dynamically bending and flexing to your daily rhythm, energy levels, and spontaneous desires.
           </p>
 
@@ -664,25 +673,26 @@ export default function Home() {
               <div
                 key={idx}
                 onMouseEnter={() => setActiveJourney(idx)}
-                className="group cursor-pointer flex flex-col w-full border-b border-white/10 pb-8 pt-8 transition-all"
+                onClick={() => setActiveJourney(idx)}
+                className="group cursor-pointer flex flex-col w-full border-b border-white/10 pb-6 pt-6 md:pb-8 md:pt-8 transition-all"
               >
                 <div className="flex items-center justify-between w-full">
-                  <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-12 w-full">
-                    <span className={`text-sm tracking-[0.3em] transition-colors duration-500 font-bold uppercase w-12 ${activeJourney === idx ? 'text-[#D4A373]' : 'text-white/30'}`}>
+                  <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-12 w-full">
+                    <span className={`text-xs md:text-sm tracking-[0.3em] transition-colors duration-500 font-bold uppercase w-12 ${activeJourney === idx ? 'text-[#D4A373]' : 'text-white/30'}`}>
                       {item.id}
                     </span>
-                    <div className="flex flex-col gap-2">
-                      <span className={`text-[10px] md:text-xs font-bold tracking-[0.2em] uppercase transition-colors duration-500 ${activeJourney === idx ? 'text-[#D4A373]' : 'text-white/0'}`}>
+                    <div className="flex flex-col gap-1 md:gap-2">
+                      <span className={`text-[9px] md:text-xs font-bold tracking-[0.2em] uppercase transition-colors duration-500 ${activeJourney === idx ? 'text-[#D4A373]' : 'text-white/0'}`}>
                         {item.theme}
                       </span>
-                      <h3 className={`text-3xl md:text-5xl lg:text-6xl font-light transition-all duration-500 transform ${activeJourney === idx ? 'text-white translate-x-2' : 'text-white/20 group-hover:text-white/50 group-hover:translate-x-2'}`}>
+                      <h3 className={`text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-light transition-all duration-500 transform ${activeJourney === idx ? 'text-white translate-x-2' : 'text-white/20 group-hover:text-white/50 group-hover:translate-x-2'}`}>
                         {item.title}
                       </h3>
                     </div>
                   </div>
                 </div>
-                <div className={`overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.76,0,0.24,1)] ${activeJourney === idx ? 'max-h-[800px] mt-8 opacity-100' : 'max-h-0 mt-0 opacity-0'}`}>
-                  <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 md:max-w-4xl border-l border-[#D4A373]/30 pl-6 md:pl-8 ml-4 md:ml-[7rem]">
+                <div className={`overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.76,0,0.24,1)] ${activeJourney === idx ? 'max-h-[800px] mt-6 md:mt-8 opacity-100' : 'max-h-0 mt-0 opacity-0'}`}>
+                  <div className="flex flex-col lg:flex-row gap-6 lg:gap-12 md:max-w-4xl border-l border-[#D4A373]/30 pl-4 md:pl-8 ml-2 md:ml-[7rem]">
 
                     {/* General Summary */}
                     <div className="w-full lg:w-2/5">
@@ -741,21 +751,21 @@ export default function Home() {
 
         <div className="flex flex-col lg:flex-row w-full max-w-6xl gap-8 justify-center items-stretch relative">
           {pricingPackages.map((pkg, idx) => (
-            <div key={idx} className="flex-1 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-sm p-8 md:p-12 flex flex-col hover:bg-white/10 hover:-translate-y-2 hover:shadow-[0_20px_40px_rgba(212,163,115,0.1)] transition-all duration-500 group relative overflow-hidden">
+            <div key={idx} className="flex-1 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-sm p-6 md:p-12 flex flex-col hover:bg-white/10 hover:-translate-y-2 hover:shadow-[0_20px_40px_rgba(212,163,115,0.1)] transition-all duration-500 group relative overflow-hidden">
               <div className="absolute top-0 right-0 w-32 h-32 bg-[#D4A373] rounded-full blur-[100px] opacity-0 group-hover:opacity-20 transition-opacity"></div>
 
               <h3 className="text-2xl md:text-3xl font-serif text-[#F3EBE6] mb-2">{pkg.name}</h3>
-              <p className="text-[10px] text-[#D4A373] tracking-[0.2em] uppercase font-bold mb-8">{pkg.duration}</p>
+              <p className="text-[10px] text-[#D4A373] tracking-[0.2em] uppercase font-bold mb-6 md:mb-8">{pkg.duration}</p>
 
-              <div className="text-3xl text-white font-light mb-8 pb-8 border-b border-white/10">
+              <div className="text-2xl md:text-3xl text-white font-light mb-6 md:mb-8 pb-6 md:pb-8 border-b border-white/10">
                 {pkg.price}
               </div>
 
-              <p className="text-sm text-white/70 leading-relaxed flex-grow">
+              <p className="text-xs md:text-sm text-white/70 leading-relaxed flex-grow">
                 {pkg.desc}
               </p>
 
-              <button onClick={(e) => scrollTo("#section7", e)} className="w-full mt-12 py-4 rounded-full border border-white/30 text-[10px] font-bold text-white uppercase tracking-[0.2em] hover:bg-white hover:text-black transition-colors z-10 cursor-none">
+              <button onClick={(e) => scrollTo("#section7", e)} className="w-full mt-8 md:mt-12 py-4 rounded-full border border-white/30 text-[10px] font-bold text-white uppercase tracking-[0.2em] hover:bg-white hover:text-black transition-colors z-10 cursor-pointer md:cursor-none">
                 Enquire Now
               </button>
             </div>
@@ -773,12 +783,12 @@ export default function Home() {
           Scenes from the Odyssey
         </h2>
 
-        <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6 max-w-7xl w-full">
+        <div className="columns-1 sm:columns-2 lg:columns-3 gap-6 max-w-7xl w-full">
           {galleryImages.map((img, i) => (
             <div
               key={i}
               onClick={() => setLightboxImg(img)}
-              className="relative group overflow-hidden rounded-2xl break-inside-avoid cursor-none"
+              className="relative group overflow-hidden rounded-2xl break-inside-avoid mb-6 cursor-pointer md:cursor-none"
             >
               <img src={img} alt={`Bali Memory ${i}`} className="w-full object-cover transition-transform duration-700 group-hover:scale-110" />
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center">
@@ -799,13 +809,13 @@ export default function Home() {
           <h2 className="text-3xl md:text-5xl font-serif">What they discovered</h2>
         </div>
 
-        <div className="flex flex-wrap justify-center gap-8 max-w-7xl w-full">
+        <div className="flex flex-wrap justify-center gap-6 md:gap-8 max-w-7xl w-full">
           {testimonials.map((t, i) => (
-            <div key={i} className="bg-white/5 border border-white/10 backdrop-blur-md p-10 rounded-3xl w-full max-w-sm flex flex-col justify-between hover:bg-white/10 transition-colors">
-              <p className="text-white/80 font-light italic leading-relaxed text-sm mb-8">"{t.text}"</p>
+            <div key={i} className="bg-white/5 border border-white/10 backdrop-blur-md p-6 md:p-10 rounded-3xl w-full max-w-sm flex flex-col justify-between hover:bg-white/10 transition-colors">
+              <p className="text-white/80 font-light italic leading-relaxed text-xs md:text-sm mb-6 md:mb-8">"{t.text}"</p>
               <div className="flex flex-col gap-1">
-                <span className="text-[#D4A373] text-sm uppercase tracking-widest font-semibold">{t.name}</span>
-                <span className="text-white/40 text-[10px] uppercase tracking-widest">{t.location}</span>
+                <span className="text-[#D4A373] text-xs md:text-sm uppercase tracking-widest font-semibold">{t.name}</span>
+                <span className="text-white/40 text-[9px] md:text-[10px] uppercase tracking-widest">{t.location}</span>
               </div>
             </div>
           ))}
@@ -818,11 +828,12 @@ export default function Home() {
           <span className="h-2 w-2 rounded-full bg-[#D4A373]"></span>
           The Territory
         </div>
-        <h2 className="text-4xl md:text-5xl font-serif text-[#F3EBE6] mb-16 text-center">
+        <h2 className="text-4xl md:text-5xl font-serif text-[#F3EBE6] mb-2 text-center">
           Our Handpicked Sanctuaries
         </h2>
+        <p className="text-xs text-white/40 mb-10 md:hidden text-center">(Swipe left/right to pan map)</p>
 
-        <div className="w-full max-w-6xl aspect-[4/5] md:aspect-[16/9] lg:aspect-[1.8/1] rounded-3xl border border-white/10 relative group bg-[#0A0505] flex items-center justify-center">
+        <div className="w-full max-w-6xl aspect-[4/5] md:aspect-[16/9] lg:aspect-[1.8/1] rounded-3xl border border-white/10 relative group bg-[#0A0505] overflow-x-auto overflow-y-hidden flex items-center justify-start md:justify-center scrollbar-hide">
 
           {/* BACKGROUND LAYER - Clipped to rounded corners */}
           <div className="absolute inset-0 rounded-3xl overflow-hidden pointer-events-none">
@@ -1006,11 +1017,11 @@ export default function Home() {
             Your escape awaits
           </p>
 
-          <h2 ref={ctaTitleRef} className="flex flex-col items-center w-full mb-20 pointer-events-none">
-            <span className="text-5xl md:text-7xl lg:text-[7rem] font-light tracking-[-0.05em] text-white/90 leading-none">
+          <h2 ref={ctaTitleRef} className="flex flex-col items-center w-full mb-12 md:mb-20 pointer-events-none">
+            <span className="text-4xl sm:text-6xl md:text-7xl lg:text-[7rem] font-light tracking-[-0.05em] text-white/90 leading-none">
               Begin the
             </span>
-            <span className="text-[5rem] md:text-[9rem] lg:text-[13rem] font-serif italic pb-4 mt-[-10px] md:mt-[-30px] bg-gradient-to-r from-[#D4A373] via-[#F3EBE6] to-[#D4A373] text-transparent bg-clip-text drop-shadow-[0_10px_40px_rgba(212,163,115,0.25)]">
+            <span className="text-[3.5rem] sm:text-[5rem] md:text-[9rem] lg:text-[13rem] font-serif italic pb-4 mt-[-10px] md:mt-[-30px] bg-gradient-to-r from-[#D4A373] via-[#F3EBE6] to-[#D4A373] text-transparent bg-clip-text drop-shadow-[0_10px_40px_rgba(212,163,115,0.25)]">
               Odyssey
             </span>
           </h2>
@@ -1019,7 +1030,7 @@ export default function Home() {
             ref={ctaBtnRef}
             onMouseMove={handleMouseMoveCTA}
             onMouseLeave={handleMouseLeaveCTA}
-            className="group relative flex h-40 w-40 md:h-48 md:w-48 items-center justify-center rounded-full bg-gradient-to-br from-[#D4A373] to-[#B0895D] text-[#0A0505] shadow-[0_0_50px_rgba(212,163,115,0.3)] transition-colors hover:from-white hover:to-white"
+            className="group relative flex h-32 w-32 md:h-48 md:w-48 items-center justify-center rounded-full bg-gradient-to-br from-[#D4A373] to-[#B0895D] text-[#0A0505] shadow-[0_0_50px_rgba(212,163,115,0.3)] transition-colors hover:from-white hover:to-white"
           >
             <span className="text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] transform transition-transform duration-500 group-hover:scale-110 z-10">Start Planning</span>
             <div className="absolute inset-1 rounded-full border border-black/20 scale-90 opacity-0 transition-all duration-300 group-hover:scale-100 group-hover:opacity-100"></div>
